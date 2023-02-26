@@ -70,7 +70,8 @@ public class Main extends ApplicationAdapter {
 		for (int i = 0; i < startControlPoints.size; i++) {
 			startControlPoints.get(i).lerp(targetControlPoints.get(i), progress);
 		}
-		// отрисовка фигуры
+		// отрисовываем фигуру
+
 		shape.drawShape(currentColor);
 	}
 
