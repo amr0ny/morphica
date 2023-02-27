@@ -126,12 +126,11 @@ public class CatmullRomShape {
             targetControlPoints = targetRandomPolygon.getVertices().toArray(new Vector2[sides]);
             startColor = currentColor;
             startRandomPolygon = currentRandomPolygon;
-
+        }
             for (int i = 0; i < sides; i++) {
-                currentControlPoints[i] = new Vector2(interpolation.apply(startControlPoints[i].x, targetControlPoints[i].x, progress), Interpolation.smooth2.apply(startControlPoints[i].y, targetControlPoints[i].y, progress));
+                currentControlPoints[i] = new Vector2(interpolation.apply(startControlPoints[i].x, targetControlPoints[i].x, progress), interpolation.apply(startControlPoints[i].y, targetControlPoints[i].y, progress));
 
             }
-        }
         drawShape();
     }
 
