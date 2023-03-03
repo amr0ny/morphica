@@ -1,9 +1,8 @@
 package com.iclustudio.morphica;
 
 import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.math.CatmullRomSpline;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.math.Interpolation;
@@ -12,20 +11,18 @@ import java.util.List;
 import java.util.Random;
 
 public class Main extends ApplicationAdapter {
-	private CatmullRomShape shape;
-	private Random random;
 
-	private Interpolation interpolation;
+	private CatmullRomShape shape1;
+	private Batch batch;
 	@Override
 	public void create() {
-		random = new Random();
-		shape = new CatmullRomShape(7, 40, 450, 4f);
-		interpolation = Interpolation.smooth2;
+		shape1 = new CatmullRomShape(5, 60, 600, 4f);
+
 	}
 
 	@Override
 	public void render() {
-		shape.render(interpolation);
+		shape1.render(Interpolation.sine);
 	}
 
 	public Array<Vector2> ToArray(List<Vector2> list) {
@@ -38,6 +35,7 @@ public class Main extends ApplicationAdapter {
 
 	@Override
 	public void dispose() {
-		shape.dispose();
+		shape1.dispose();
 	}
+
 }
