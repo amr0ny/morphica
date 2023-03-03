@@ -107,9 +107,7 @@ public class CatmullRomShape {
     }
 
     public void render(Interpolation interpolation) {
-        Gdx.gl.glClearColor(1, 1, 1, 1); // задает цвет очистки экрана (черный)
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT); // очистить экран
-        // обновление текущего прогресса изменения
+             // обновление текущего прогресса изменения
         timeElapsed += Gdx.graphics.getDeltaTime();
         alpha = timeElapsed / duration;
 
@@ -147,5 +145,9 @@ public class CatmullRomShape {
     public void dispose() {
         pixmap.dispose();
         shapeRenderer.dispose();
+    }
+
+    public Texture getTexture() {
+        return texture;
     }
 }
