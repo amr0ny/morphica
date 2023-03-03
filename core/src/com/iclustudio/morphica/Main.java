@@ -21,7 +21,7 @@ public class Main extends ApplicationAdapter {
 	private Random random;
 	@Override
 	public void create() {
-		shapesAmount = 5;
+		shapesAmount = 3;
 		shapes = new Array<CatmullRomShape>();
 		shapes.setSize(shapesAmount);
 		for (int i = 0; i < shapesAmount; i++) {
