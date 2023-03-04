@@ -1,29 +1,20 @@
 package com.iclustudio.morphica;
 
-import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.TimeUtils;
 
 import java.util.List;
-import java.util.Random;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 
-public class RandomPolygon {
+public class Polygon {
     private List<Vector2> vertices;
 
-    public RandomPolygon(int sides, float minRadius, float maxRadius) {
+    public Polygon(int sides, float minRadius, float maxRadius) {
         vertices = new ArrayList<Vector2>();
 
         // Вычисляем угол между вершинами многоугольника.
