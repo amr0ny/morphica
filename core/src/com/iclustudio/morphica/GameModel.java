@@ -4,33 +4,24 @@ import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 
-public class GameModel implements IModel {
-    int shapesAmount;
-    Array<ShapeModel> shapeModels;
+public class GameModel implements IModel{
 
-    Interpolation interpolation;
-    public GameModel(int shapesAmount) {
-        this.shapesAmount = shapesAmount;
-        this.shapeModels = new Array<ShapeModel>();
-        this.interpolation = Interpolation.sine;
-        shapeModels.setSize(shapesAmount);
-        for (int i = 0; i < shapesAmount; i++) {
-            shapeModels.set(i, new ShapeModel(MathUtils.random(4, 10), (float)MathUtils.random(10, 60), (float)MathUtils.random(300, 700), (float)MathUtils.random(1, 10), interpolation));
-        }
+    private ShapeEngineModel shapeEngineModel;
+
+    public GameModel() {
+        shapeEngineModel = new ShapeEngineModel(2, 4, 3, 7, null);
     }
 
     public void update(float deltaTime) {
-        for (int i = 0; i < shapesAmount; i++) {
-            shapeModels.get(i).update(deltaTime);
-        }
+        shapeEngineModel.update(deltaTime);
     }
 
-    public Array<ShapeModel> getShapeModels() {
-        return shapeModels;
+    public ShapeEngineModel getShapeEngineModel(){
+        return shapeEngineModel;
     }
+
     public void dispose() {
-        for (int i = 0; i < shapesAmount; i++) {
-            shapeModels.get(i).dispose();
-        }
+        shapeEngineModel.dispose();
     }
+
 }

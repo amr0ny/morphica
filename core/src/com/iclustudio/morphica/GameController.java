@@ -10,6 +10,7 @@ public class GameController implements IController {
     }
     public void update(float deltaTime) {
         gameModel.update(deltaTime);
+        gameView.render();
     }
 
     public void dispose() {
