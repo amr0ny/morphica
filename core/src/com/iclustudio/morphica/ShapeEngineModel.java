@@ -48,7 +48,9 @@ public class ShapeEngineModel implements IModel {
         for (int i = 0; i < shapesAmount; i++) {
             if (shapeModels.get(i).isTransitionOver()) {
                 System.out.println(i + " transition finished!");
-                shapeModels.get(i).nextTargetControlPoints();
+
+
+                shapeModels.get(i).getTargetPolygonModel().nextVertices();
             }
 
 

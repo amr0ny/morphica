@@ -9,7 +9,7 @@ public class GameModel implements IModel{
     private ShapeEngineModel shapeEngineModel;
 
     public GameModel() {
-        shapeEngineModel = new ShapeEngineModel(2, 4, 3, 7, null);
+        shapeEngineModel = new ShapeEngineModel(1, 1, 3, 7, null);
     }
 
     public void update(float deltaTime) {

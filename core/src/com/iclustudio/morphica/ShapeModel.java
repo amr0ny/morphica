@@ -9,12 +9,12 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.CatmullRomSpline;
 import com.badlogic.gdx.math.EarClippingTriangulator;
 import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.math.Vector;
 import com.badlogic.gdx.math.Vector2;
 
 import java.util.Arrays;
-import java.util.Random;
 
-public class ShapeModel extends Polygon implements IModel {
+public class ShapeModel extends PolygonModel implements IModel {
     private final int POINTS_NUM = 40;
 
 
@@ -25,28 +25,34 @@ public class ShapeModel extends Polygon implements IModel {
     private Interpolation interpolation;
 
 
-    private Color currentColor;
-    private Color targetColor;
-    private Color startColor;
+
     float[] vertices;
     short[] indices;
+
+
+    private float alpha = 0;
+    private float timeElapsed = 0;
+
     private CatmullRomSpline<Vector2> curve;
-
-
     private Pixmap pixmap;
     private Texture texture;
     private ShapeRenderer shapeRenderer;
     private PolygonRegion region;
 
-    private Random random;
-    private Vector2[] currentControlPoints;
-    private Vector2 tmp;
-    private float alpha = 0;
 
-    private float timeElapsed = 0;
+    private PolygonModel currentPolygonModel;
+    private PolygonModel startPolygonModel;
+    private PolygonModel targetPolygonModel;
 
     public ShapeModel(int sides, float minRadius, float maxRadius, float duration, Interpolation interpolation) {
         super(sides, minRadius, maxRadius);
+        startPolygonModel = new PolygonModel(sides, minRadius, maxRadius);
+        startPolygonModel.nextColor();
+        targetPolygonModel = new PolygonModel(sides, minRadius, maxRadius);
+        targetPolygonModel.nextColor();
+        currentPolygonModel = startPolygonModel;
+        currentPolygonModel.setColor(startPolygonModel.getColor());
+
         this.sides = sides;
         this.minRadius = minRadius;
         this.maxRadius = maxRadius;
@@ -56,33 +62,24 @@ public class ShapeModel extends Polygon implements IModel {
         this.vertices = new float[POINTS_NUM * 2];
         this.indices = new short[POINTS_NUM + 2];
 
+        this.pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        this.pixmap.setColor(currentPolygonModel.getColor());
+        this.texture = new Texture(pixmap);
+        this.region = new PolygonRegion(new TextureRegion(texture), currentPolygonModel.getVertices(), new EarClippingTriangulator().computeTriangles(vertices).toArray());
+        this.shapeRenderer = new ShapeRenderer();
+        Vector2[] vectorCurrentVertices = new Vector2[currentPolygonModel.getVertices().length/2];
 
-        this.random = new Random();
-
-
-        this.currentControlPoints = Arrays.copyOf(getStartControlPoints(), getStartControlPoints().length);
-
-        float[] floatCurrentControlPoints = new float[currentControlPoints.length * 2]; // массив float дол
-        for (int i = 0, j = 0; i < currentControlPoints.length; i++, j += 2) {
-            floatCurrentControlPoints[j] = currentControlPoints[i].x;
-            floatCurrentControlPoints[j + 1] = currentControlPoints[i].y;
+        for (int i = 0; i < currentPolygonModel.getVertices().length; i += 2) {
+            vectorCurrentVertices[i / 2] = new Vector2(currentPolygonModel.getVertices()[i], currentPolygonModel.getVertices()[i + 1]);
         }
 
-        this.startColor = nextColor();
-        this.targetColor = nextColor();
-        this.currentColor = new Color(startColor.r, startColor.g, startColor.b, 1f);
-        this.pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-        this.pixmap.setColor(currentColor);
-        this.texture = new Texture(pixmap);
-        this.region = new PolygonRegion(new TextureRegion(texture), floatCurrentControlPoints, new EarClippingTriangulator().computeTriangles(vertices).toArray());
-        this.shapeRenderer = new ShapeRenderer();
-
-        this.curve = new CatmullRomSpline<>(this.currentControlPoints, true);
-        this.tmp = new Vector2();
+        this.curve = new CatmullRomSpline<>(vectorCurrentVertices, true);
     }
 
 
     public void update(float deltaTime) {
+
+        Vector2 tmp = new Vector2();
         float t = 0;
         float step = 1f / POINTS_NUM;
         for (int i = 0; i < POINTS_NUM; i++) {
@@ -99,56 +96,60 @@ public class ShapeModel extends Polygon implements IModel {
             indices[i + 1] = (short) i;
         }
         indices[POINTS_NUM + 1] = 0;
-
+        setVertices(vertices);
 
         timeElapsed += deltaTime;
         alpha = timeElapsed / duration;
 
-        currentColor.r = interpolation.apply(startColor.r, targetColor.r, alpha);
-        currentColor.g = interpolation.apply(startColor.g, targetColor.g, alpha);
-        currentColor.b = interpolation.apply(startColor.b, targetColor.b, alpha);
+        currentPolygonModel.setColor(new Color(interpolation.apply(startPolygonModel.getColor().r,
+                targetPolygonModel.getColor().r, alpha), interpolation.apply(startPolygonModel.getColor().g,
+                targetPolygonModel.getColor().g, alpha), interpolation.apply(startPolygonModel.getColor().b,
+                targetPolygonModel.getColor().b, alpha), 1f));
 
         for (int i = 0; i < sides; i++) {
-            currentControlPoints[i] = new Vector2(interpolation.apply(getStartControlPoints()[i].x, getTargetControlPoints()[i].x, alpha), interpolation.apply(getStartControlPoints()[i].y, getTargetControlPoints()[i].y, alpha));
+            currentPolygonModel.setVertex(i, new Vector2(interpolation.apply(startPolygonModel.getVertices()[i*2], targetPolygonModel.getVertices()[i*2], alpha), interpolation.apply(startPolygonModel.getVertices()[i*2+1], targetPolygonModel.getVertices()[i*2+1], alpha)));
         }
 
         if (isTransitionOver()) {
             timeElapsed = 0;
-            targetColor = nextColor();
-            startColor = new Color(currentColor.r, currentColor.g, currentColor.b, 1f);
-            setStartControlPoints(currentControlPoints);
+            targetPolygonModel.nextColor();
+            startPolygonModel.setColor(currentPolygonModel.getColor());
+            startPolygonModel.setVertices(currentPolygonModel.getVertices());
         }
 
+        this.curve = new CatmullRomSpline<>(currentPolygonModel.getVectorVertices(), true);
 
 
-        pixmap.setColor(currentColor);
+        pixmap.setColor(currentPolygonModel.getColor());
         pixmap.fill();
         texture = new Texture(pixmap);
-        //Создание PolygonRegion для триангуляции
         region = new PolygonRegion(new TextureRegion(texture), vertices, new EarClippingTriangulator().computeTriangles(vertices).toArray());
 
     }
-
-    public float[] getVertices() {
-        return vertices;
-    }
-
-    public Interpolation getInterpolation() {
-        return  interpolation;
-    }
-
-    public float getDuration() {
-        return duration;
-    }
-
     public boolean isTransitionOver(){
         return (alpha > 1 );
     }
-
     public PolygonRegion getShape() {
         return region;
     }
-
+    public float getDuration() {
+        return duration;
+    }
+    public PolygonModel getCurrentPolygonModel() {
+        return currentPolygonModel;
+    }
+    public PolygonModel getStartPolygonModel() {
+        return startPolygonModel;
+    }
+    public PolygonModel getTargetPolygonModel() {
+        return targetPolygonModel;
+    }
+    public void setColor(Color color) {
+        currentPolygonModel.setColor(color);
+    }
+    public Color getColor() {
+        return currentPolygonModel.getColor();
+    }
     public void dispose() {
         pixmap.dispose();
         shapeRenderer.dispose();
