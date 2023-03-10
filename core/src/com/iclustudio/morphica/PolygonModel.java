@@ -84,12 +84,14 @@ public class PolygonModel extends Polygon {
         }
         super.setVertices(floatVertices);
     }
+    public Vector2[] getVertexes() {
+        Vector2[] vectorVertices = new Vector2[getVertices().length/2];
 
-    public void setVertex(int i, Vector2 vertex) {
-        getVertices()[i*2] = vertex.x;
-        getVertices()[i*2+1] = vertex.y;
+        for (int i = 0; i < getVertices().length; i += 2) {
+            vectorVertices[i / 2] = new Vector2(getVertices()[i], getVertices()[i + 1]);
+        }
+        return vectorVertices;
     }
-
     private static Vector2 getCenter(List<Vector2> vertices) {
         float x = 0;
         float y = 0;

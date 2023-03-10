@@ -42,18 +42,29 @@ public class ShapeEngineModel implements IModel {
             }
         }
 
+        // A birth of blobs lifecycle stage
+        // ...
+
+
     }
 
     public void update(float deltaTime) {
+
+        // The transition lifecycle stage
+        // ...
+
+
+
+
+        // The end of transition lifecycle stage
+
         for (int i = 0; i < shapesAmount; i++) {
             if (shapeModels.get(i).isTransitionOver()) {
-                System.out.println(i + " transition finished!");
+                // ...
 
 
                 shapeModels.get(i).getTargetPolygonModel().nextVertices();
             }
-
-
             shapeModels.get(i).update(deltaTime);
         }
 

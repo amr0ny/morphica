@@ -50,7 +50,7 @@ public class ShapeModel extends PolygonModel implements IModel {
         startPolygonModel.nextColor();
         targetPolygonModel = new PolygonModel(sides, minRadius, maxRadius);
         targetPolygonModel.nextColor();
-        currentPolygonModel = startPolygonModel;
+        currentPolygonModel = new PolygonModel(sides, minRadius, maxRadius);
         currentPolygonModel.setColor(startPolygonModel.getColor());
 
         this.sides = sides;
@@ -67,13 +67,8 @@ public class ShapeModel extends PolygonModel implements IModel {
         this.texture = new Texture(pixmap);
         this.region = new PolygonRegion(new TextureRegion(texture), currentPolygonModel.getVertices(), new EarClippingTriangulator().computeTriangles(vertices).toArray());
         this.shapeRenderer = new ShapeRenderer();
-        Vector2[] vectorCurrentVertices = new Vector2[currentPolygonModel.getVertices().length/2];
 
-        for (int i = 0; i < currentPolygonModel.getVertices().length; i += 2) {
-            vectorCurrentVertices[i / 2] = new Vector2(currentPolygonModel.getVertices()[i], currentPolygonModel.getVertices()[i + 1]);
-        }
-
-        this.curve = new CatmullRomSpline<>(vectorCurrentVertices, true);
+        this.curve = new CatmullRomSpline<>(currentPolygonModel.getVertexes(), true);
     }
 
 
@@ -106,20 +101,17 @@ public class ShapeModel extends PolygonModel implements IModel {
                 targetPolygonModel.getColor().g, alpha), interpolation.apply(startPolygonModel.getColor().b,
                 targetPolygonModel.getColor().b, alpha), 1f));
 
-        for (int i = 0; i < sides; i++) {
-            currentPolygonModel.setVertex(i, new Vector2(interpolation.apply(startPolygonModel.getVertices()[i*2], targetPolygonModel.getVertices()[i*2], alpha), interpolation.apply(startPolygonModel.getVertices()[i*2+1], targetPolygonModel.getVertices()[i*2+1], alpha)));
+        for (int i = 0; i < currentPolygonModel.getVertexCount(); i++) {
+            currentPolygonModel.setVertex(i, interpolation.apply(startPolygonModel.getVertices()[i*2], targetPolygonModel.getVertices()[i*2], alpha), interpolation.apply(startPolygonModel.getVertices()[i*2+1], targetPolygonModel.getVertices()[i*2+1], alpha));
         }
 
         if (isTransitionOver()) {
             timeElapsed = 0;
             targetPolygonModel.nextColor();
             startPolygonModel.setColor(currentPolygonModel.getColor());
-            startPolygonModel.setVertices(currentPolygonModel.getVertices());
+            startPolygonModel.setVertices(Arrays.copyOf(currentPolygonModel.getVertices(), currentPolygonModel.getVertexCount()*2));
         }
-
-        this.curve = new CatmullRomSpline<>(currentPolygonModel.getVectorVertices(), true);
-
-
+        this.curve = new CatmullRomSpline<>(currentPolygonModel.getVertexes(), true);
         pixmap.setColor(currentPolygonModel.getColor());
         pixmap.fill();
         texture = new Texture(pixmap);
